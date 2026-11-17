@@ -165,9 +165,9 @@ powershell -ExecutionPolicy Bypass -File scripts\build_windows.ps1
 产物：
 
 - `dist\TianTianJiZhang\`：免安装目录版，双击 `TianTianJiZhang.exe` 即可运行
-- `release\TianTianJiZhang-Setup-0.3.0.exe`：安装包（需先装 Inno Setup）
+- `release\TianTianJiZhang-Setup-0.3.1.exe`：安装包（需先装 Inno Setup）
 
-当前已构建并验证的免安装包：`release\TianTianJiZhang-0.3.0-win64-portable.zip`（约 22 MB）。v0.3.0 新增“彻底删除”（回收站里可把记录真正抹掉，不自动清理）；v0.2.0 新增 CSV 导入；v0.1.1 修复了无控制台打包时 `Unable to configure formatter 'default'`（`sys.stderr` 为 None）的启动崩溃。
+当前已构建并验证的免安装包：`release\TianTianJiZhang-0.3.1-win64-portable.zip`（约 22 MB）。v0.3.1 修复前端文案文件编码损坏导致的构建失败，并新增“彻底删除”（回收站里可把记录真正抹掉，不自动清理）；v0.2.0 新增 CSV 导入；v0.1.1 修复了无控制台打包时 `Unable to configure formatter 'default'`（`sys.stderr` 为 None）的启动崩溃。
 
 > Windows 10/11 一般自带 WebView2 运行时；如果窗口白屏，请安装
 > [Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/)。
