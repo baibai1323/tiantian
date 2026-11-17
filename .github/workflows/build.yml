@@ -14,7 +14,7 @@ jobs:
         include:
           - os: windows-latest
             artifact: TianTian-Windows
-          - os: macos-14          # Apple 芯片（M1/M2/M3/M4）
+          - os: macos-15
             artifact: TianTian-macOS-AppleSilicon
           - os: macos-15-intel    # Intel 芯片
             artifact: TianTian-macOS-Intel
