@@ -646,11 +646,11 @@ CREATE TABLE setting (
 | M6 | Windows / macOS 打包 | ✅ Windows 目录版已构建验证；macOS 两个包由 GitHub Actions 构建成功，已下载并校验 zip 完整、主程序架构为 arm64 / x86_64（未签名，尚未真机启动） |
 | M7 | 打磨（空状态、错误提示、快捷键、性能） | ⏳ 未开始 |
 
-**已落地的目录**：`D:\dsh-work\tiantian\`（`backend/`、`frontend/`、`scripts/`、`run.py`、`README.md`、`.github/workflows/build.yml`）。
+**已落地的目录**：项目根目录（`backend/`、`frontend/`、`scripts/`、`run.py`、`README.md`、`.github/workflows/build.yml`）。
 
 **验证方式**：`README.md` 里有完整命令。核心三步——装依赖 → `npm run build` → `python run.py`。
 
-**已产出可运行版本**：`D:\dsh-work\tiantian\release\TianTianJiZhang-0.2.0-win64-portable.zip`（约 22 MB，解压后双击 `TianTianJiZhang.exe`）。已实测：原生窗口正常打开、首页/账单/统计/设置四个页面正常、数据目录可配置、接口健康检查正常、CSV 导出/导入往返一致。
+**已产出可运行版本**：`release/TianTianJiZhang-0.4.0-win64-portable.zip`（约 23 MB，解压后双击 `TianTianJiZhang.exe`）。已实测：原生窗口正常打开、四个页面正常、数据目录可配置、接口健康检查正常、CSV 导出/导入往返一致。
 
 ---
 
@@ -688,7 +688,7 @@ CREATE TABLE setting (
 
 ## 18. 版本管理（Git）
 
-- **本地仓库**：`D:\dsh-work\tiantian`，分支 `main`；产品文档（本文件）也在这个仓库里。
+- **本地仓库**：项目根目录，分支 `main`；产品文档（本文件）也在这个仓库里。
 - **云端备份**：私有仓库 `https://github.com/baibai1323/tiantian`，本地提交后 `git push` 同步一份到 GitHub。
 - **提交规则**：每完成一个你能看见的功能或修复，就提交一次，提交说明用中文写清楚改了什么。
 - **不纳入 Git 的东西**：`release/` 安装包、`dist/`、`build/`、`.venv`、`node_modules`（见 `.gitignore`），避免仓库被大文件撑大。

@@ -1,11 +1,22 @@
 # 天天记账 · TianTian
 
-一款只做「支出记录」的桌面记账应用：人民币、两级分类、数据全部留在本机。
-Windows 与 macOS 共用一套代码，界面优先宽屏，同时适配小窗口和手机尺寸。
+> 一个「只记支出」的桌面记账应用：人民币、两级分类、数据全部留在本机。
+> 一套 Vue 3 代码同时服务 Windows 与 macOS，PyWebView 做原生窗口，FastAPI + SQLite 做本地后端。
 
-- 技术栈：FastAPI + SQLModel + SQLite（后端），Vue 3 + Element Plus（前端），PyWebView（桌面外壳）
-- 数据目录：Windows `%APPDATA%\TianTianJiZhang`，macOS `~/Library/Application Support/TianTianJiZhang`
-- 产品文档与所有技术决策记录：[`../dsh.md`](../dsh.md)
+**它解决的问题**：市面上的记账 App 要么强制登录、要么把账单传到云端、要么功能臃肿。天天记账把“记一笔”压缩到 3 步（金额 → 分类 → 保存），数据只存在你自己的电脑里，每次启动自动备份。
+
+**技术栈**：FastAPI · SQLModel · SQLite · Vue 3 · Element Plus · PyWebView · PyInstaller · GitHub Actions
+
+**产品文档**：[`dsh.md`](dsh.md)——需求、分类体系、每个技术决策的备选方案与取舍理由都在里面。
+
+## 项目亮点
+
+- **一套代码，三种窗口形态**：≥1024px 左侧导航、768–1023px 图标栏、<768px 底部 Tab；没有第二套移动端代码
+- **本地优先**：SQLite 单文件，免安装、免登录、断网可用；启动自动备份，保留最近 7 份
+- **完整的账单生命周期**：新增 / 编辑 / 软删除（进回收站）/ 恢复 / 彻底删除，删除有二次确认
+- **CSV 双向**：导出带 UTF-8 BOM（Excel 不乱码），导入按「日期+金额+分类+备注」自动去重，可重复导入
+- **可扩展分类**：内置 10 个一级、67 个二级分类；用户可新增、改名、删除自己的分类，删除时账单自动迁到「其他 / 未分类」
+- **工程化交付**：PyInstaller 免安装包（Windows）、GitHub Actions 三平台构建（Windows + macOS 双架构）、启动日志与异常兜底
 
 ## 界面预览
 
@@ -49,6 +60,28 @@ tiantian/
 ├── run.py                   # 一键启动（内置服务 + 桌面窗口）
 └── README.md
 ```
+
+## 架构
+
+```
+┌────────────── 桌面窗口（PyWebView）──────────────┐
+│  Vue 3 + Element Plus（构建产物由 FastAPI 托管） │
+└───────────────────────┬─────────────────────────┘
+                        │ fetch /api/*
+┌───────────────────────▼─────────────────────────┐
+│ FastAPI（与窗口同进程的线程）                    │
+│  routers: categories / expenses / stats /        │
+│           export / importer                      │
+│  SQLModel ── SQLite（tiantian.db）               │
+│  启动时：建表 + 写入默认分类 + 自动备份           │
+└──────────────────────────────────────────────────┘
+```
+
+**为什么这么选**：
+
+- 桌面壳用 PyWebView：直接复用 Web 界面，安装包约 23 MB，不捆绑 Chromium
+- 后端与窗口同进程：用户只需双击一个 exe，没有“先启动服务、再开界面”这一步
+- SQLite 单文件：备份 = 复制文件，迁移 = 拷走目录，不需要安装数据库
 
 ## 一、准备环境
 
@@ -278,3 +311,7 @@ v0.1.0 的打包版在“无控制台”模式下启动时会踩到 uvicorn 日�
 | GET | `/api/stats/trend?months=6` | 近 N 月趋势 |
 | GET | `/api/export/csv?month=YYYY-MM` | 导出 CSV |
 | POST | `/api/import/csv` | 导入 CSV（JSON 传 `{"content": "..."}`） |
+
+## 九、License
+
+MIT License，见 [LICENSE](LICENSE)。可自由使用、修改、分发，保留版权声明即可。

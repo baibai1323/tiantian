@@ -1,10 +1,10 @@
 # Git 常用操作速查（天天记账专用）
 
-> 仓库位置：`D:\dsh-work\tiantian`　分支：`main`　远端：`origin` → GitHub 私有仓库
+> 仓库位置：项目根目录（`tiantian/`）　分支：`main`　远端：`origin` → GitHub 仓库
 > 在 PowerShell 里执行，路径先切到项目：
 
 ```powershell
-cd D:\dsh-work\tiantian
+cd path\to\tiantian
 ```
 
 ---
@@ -183,7 +183,7 @@ git rm --cached 文件名     # 从 Git 里移除，但保留本地文件
 ## 十、每天 30 秒的固定动作
 
 ```powershell
-cd D:\dsh-work\tiantian
+cd path\to\tiantian
 git status
 git add .
 git commit -m "一句话说明这次改了什么"

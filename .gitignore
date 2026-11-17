@@ -27,3 +27,9 @@ backups/
 .vscode/
 .idea/
 .DS_Store
+
+# 导出的账单（可能含真实消费记录）与运行时临时文件
+*.csv
+*.xlsx
+.tmp/
+lan.enabled
