@@ -1,5 +1,8 @@
 # 天天记账 · TianTian
 
+[![Build](https://github.com/baibai1323/tiantian/actions/workflows/build.yml/badge.svg)](https://github.com/baibai1323/tiantian/actions/workflows/build.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 > 一个「只记支出」的桌面记账应用：人民币、两级分类、数据全部留在本机。
 > 一套 Vue 3 代码同时服务 Windows 与 macOS，PyWebView 做原生窗口，FastAPI + SQLite 做本地后端。
 
