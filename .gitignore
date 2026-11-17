@@ -33,3 +33,7 @@ backups/
 *.xlsx
 .tmp/
 lan.enabled
+
+# 应用运行时临时目录（WebView2）
+/tmp*/
+EBWebView/

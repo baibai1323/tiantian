@@ -16,7 +16,7 @@
 
 - **一套代码，三种窗口形态**：≥1024px 左侧导航、768–1023px 图标栏、<768px 底部 Tab；没有第二套移动端代码
 - **本地优先**：SQLite 单文件，免安装、免登录、断网可用；启动自动备份，保留最近 7 份
-- **完整的账单生命周期**：新增 / 编辑 / 软删除（进回收站）/ 恢复 / 彻底删除，删除有二次确认
+- **完整的账单生命周期**：新增 / 编辑 / 软删除（移入独立回收站）/ 恢复 / 彻底删除 / 一键清空，删除与清空都有二次确认
 - **CSV 双向**：导出带 UTF-8 BOM（Excel 不乱码），导入按「日期+金额+分类+备注」自动去重，可重复导入
 - **可扩展分类**：内置 10 个一级、67 个二级分类；用户可新增、改名、删除自己的分类，删除时账单自动迁到「其他 / 未分类」
 - **工程化交付**：PyInstaller 免安装包（Windows）、GitHub Actions 三平台构建（Windows + macOS 双架构）、启动日志与异常兜底
@@ -31,9 +31,13 @@
 | --- | --- |
 | ![统计](docs/screenshots/stats.png) | ![记一笔](docs/screenshots/dialog.png) |
 
-| 导入结果 | 分类管理 |
+| 回收站 | 导入结果 |
 | --- | --- |
-| ![导入](docs/screenshots/import.png) | ![分类管理](docs/screenshots/categories.png) |
+| ![回收站](docs/screenshots/trash.png) | ![导入](docs/screenshots/import.png) |
+
+| 分类管理 | 删除确认 |
+| --- | --- |
+| ![分类管理](docs/screenshots/categories.png) | ![删除确认](docs/screenshots/trash-confirm.png) |
 
 ## 目录结构
 
@@ -184,6 +188,7 @@ cd ..
 | 导出 CSV | 设置页或账单页点「导出 CSV」，导出当前月份 |
 | 导入 CSV | 设置页「导入账单」，选择本应用导出的 CSV；重复记录自动跳过 |
 | 自定义分类 | 设置页「分类管理」，可新增一级/二级分类；自己建的能改名、删除，删除时账单归入「其他 / 未分类」 |
+| 回收站 | 侧栏「回收站」，删除的记录先来这里，可恢复、彻底删除或一键清空 |
 
 - 每次启动会自动备份一次数据库。
 - 想换位置，可设置环境变量 `TIANTIAN_DATA_DIR` 指向新目录。
@@ -202,9 +207,9 @@ powershell -ExecutionPolicy Bypass -File scripts\build_windows.ps1
 产物：
 
 - `dist\TianTianJiZhang\`：免安装目录版，双击 `TianTianJiZhang.exe` 即可运行
-- `release\TianTianJiZhang-Setup-0.4.0.exe`：安装包（需先装 Inno Setup）
+- `release\TianTianJiZhang-Setup-0.5.0.exe`：安装包（需先装 Inno Setup）
 
-当前已构建并验证的免安装包：`release\TianTianJiZhang-0.4.0-win64-portable.zip`（约 22 MB）。v0.4.0 新增「分类管理」（自定义一级/二级分类，可改名、可删除，删除时账单一并迁到「其他 / 未分类」）；v0.3.1 修复前端文案文件编码损坏导致的构建失败，并新增“彻底删除”（回收站里可把记录真正抹掉，不自动清理）；v0.2.0 新增 CSV 导入；v0.1.1 修复了无控制台打包时 `Unable to configure formatter 'default'`（`sys.stderr` 为 None）的启动崩溃。
+当前已构建并验证的免安装包：`release\TianTianJiZhang-0.5.0-win64-portable.zip`（约 23 MB）。v0.5.0 把回收站做成独立页面（侧栏入口、笔数与合计、恢复 / 彻底删除 / 一键清空），删除确认明确写“移入回收站，不是永久删除”；v0.4.0 新增「分类管理」（自定义一级/二级分类，可改名、可删除，删除时账单一并迁到「其他 / 未分类」）；v0.3.1 修复前端文案文件编码损坏导致的构建失败，并新增“彻底删除”；v0.2.0 新增 CSV 导入；v0.1.1 修复了无控制台打包时 `Unable to configure formatter 'default'`（`sys.stderr` 为 None）的启动崩溃。
 
 > Windows 10/11 一般自带 WebView2 运行时；如果窗口白屏，请安装
 > [Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/)。
@@ -292,6 +297,9 @@ v0.1.0 的打包版在“无控制台”模式下启动时会踩到 uvicorn 日�
 **10. 能自己加分类吗？删掉分类后账单会怎样**
 能。设置页 →「分类管理」可以新增一级/二级分类；系统自带的 10 个大类只能看，不能改名或删除；自己建的可以改名、删除。删除分类时，挂在它下面的账单会迁到「其他 / 未分类」，不会丢，确认框里会先告诉你有几笔。
 
+**11. 删除的账单去哪了？怎么彻底删掉**
+不会立刻消失。删除只是移进侧栏的「回收站」，随时可以点「恢复」拿回来；确认不要了，在回收站里点「彻底删除」，或点右上角「清空回收站」一次性抹掉，这两步都无法撤销。
+
 ## 八、接口速查
 
 启动后端后打开 <http://127.0.0.1:8000/docs> 可看交互式接口文档。
@@ -304,10 +312,12 @@ v0.1.0 的打包版在“无控制台”模式下启动时会踩到 uvicorn 日�
 | POST | `/api/categories` | 新增分类（`parent_id` 为空即一级） |
 | PATCH | `/api/categories/{id}` | 改名（系统分类 403） |
 | DELETE | `/api/categories/{id}` | 删除自定义分类，账单迁到「其他 / 未分类」（系统分类 403） |
-| GET | `/api/expenses?month=YYYY-MM` | 账单列表（支持分类、搜索、分页） |
+| GET | `/api/expenses?month=YYYY-MM` | 账单列表（支持分类、搜索、分页，不含已删除） |
 | POST | `/api/expenses` | 新增一笔 |
 | PATCH | `/api/expenses/{id}` | 修改 |
 | DELETE | `/api/expenses/{id}` | 软删除（移进回收站，可恢复） |
+| GET | `/api/expenses/trash` | 回收站列表（按删除时间倒序，含笔数与合计） |
+| DELETE | `/api/expenses/trash` | 清空回收站（全部彻底删除） |
 | POST | `/api/expenses/{id}/restore` | 恢复（从回收站拿回来） |
 | DELETE | `/api/expenses/{id}/permanent` | 彻底删除（仅限已进回收站的记录，不可恢复） |
 | GET | `/api/stats/summary?month=YYYY-MM` | 月度汇总、分类占比、二级排行 |

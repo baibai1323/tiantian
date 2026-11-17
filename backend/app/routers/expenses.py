@@ -99,6 +99,45 @@ def create_expense(payload: ExpenseIn, session: Session = Depends(get_session)) 
     return to_expense_out(expense, categories)
 
 
+@router.get("/trash", response_model=ExpenseListOut)
+def list_trash(
+    limit: int = Query(default=200, ge=1, le=1000),
+    offset: int = Query(default=0, ge=0),
+    session: Session = Depends(get_session),
+) -> ExpenseListOut:
+    """回收站：所有已软删除的记录，按删除时间倒序。"""
+    conditions = [Expense.deleted_at.is_not(None)]  # type: ignore[union-attr]
+    total = session.exec(select(func.count()).select_from(Expense).where(*conditions)).one()
+    sum_cents = session.exec(
+        select(func.coalesce(func.sum(Expense.amount_cents), 0)).where(*conditions)
+    ).one()
+    rows = session.exec(
+        select(Expense)
+        .where(*conditions)
+        .order_by(Expense.deleted_at.desc(), Expense.id.desc())
+        .offset(offset)
+        .limit(limit)
+    ).all()
+
+    categories = load_categories(session)
+    return ExpenseListOut(
+        items=[to_expense_out(row, categories) for row in rows],
+        total=int(total),
+        sum_cents=int(sum_cents),
+        sum_yuan=cents_to_yuan(int(sum_cents)),
+    )
+
+
+@router.delete("/trash")
+def empty_trash(session: Session = Depends(get_session)) -> dict[str, int]:
+    """清空回收站：把所有已软删除的记录真正删掉。"""
+    rows = session.exec(select(Expense).where(Expense.deleted_at.is_not(None))).all()  # type: ignore[union-attr]
+    for row in rows:
+        session.delete(row)
+    session.commit()
+    return {"deleted": len(rows)}
+
+
 @router.get("/{expense_id}", response_model=ExpenseOut)
 def get_expense(expense_id: int, session: Session = Depends(get_session)) -> ExpenseOut:
     expense = _get_active_expense(session, expense_id)

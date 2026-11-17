@@ -30,7 +30,7 @@ export function formatDate(dateStr) {
 
 export const store = reactive({
   month: currentMonth(),
-  version: '0.4.0',
+  version: '0.5.0',
   categories: [],
   categoriesLoaded: false,
   dialogVisible: false,

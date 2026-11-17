@@ -42,6 +42,14 @@ export const api = {
   deleteExpense: (id) => request(`/api/expenses/${id}`, { method: 'DELETE' }),
   restoreExpense: (id) => request(`/api/expenses/${id}/restore`, { method: 'POST' }),
   purgeExpense: (id) => request(`/api/expenses/${id}/permanent`, { method: 'DELETE' }),
+  trash: (params = {}) => {
+    const qs = new URLSearchParams()
+    for (const [k, v] of Object.entries(params)) {
+      if (v !== undefined && v !== null && v !== '') qs.set(k, v)
+    }
+    return request(`/api/expenses/trash?${qs.toString()}`)
+  },
+  emptyTrash: () => request('/api/expenses/trash', { method: 'DELETE' }),
 
   summary: (month) => request(`/api/stats/summary?month=${encodeURIComponent(month)}`),
   trend: (months = 6) => request(`/api/stats/trend?months=${months}`),

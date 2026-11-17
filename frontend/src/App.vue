@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { HomeFilled, Tickets, TrendCharts, Setting, Plus } from '@element-plus/icons-vue'
+import { HomeFilled, Tickets, TrendCharts, Setting, Plus, Delete } from '@element-plus/icons-vue'
 
 import ExpenseDialog from './components/ExpenseDialog.vue'
 import { api } from './api'
@@ -12,6 +12,7 @@ const route = useRoute()
 const navItems = [
   { path: '/', label: '首页', icon: HomeFilled },
   { path: '/bills', label: '账单', icon: Tickets },
+  { path: '/trash', label: '回收站', icon: Delete },
   { path: '/stats', label: '统计', icon: TrendCharts },
   { path: '/settings', label: '设置', icon: Setting },
 ]
