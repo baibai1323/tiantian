@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.python312/
+venv/
+env/
+
+# 打包
+build/
+dist/
+*.spec
+release/
+
+# 前端
+frontend/node_modules/
+frontend/dist/
+
+# 本机数据 / 日志
+*.db
+*.db-wal
+*.db-shm
+backups/
+*.log
+
+# 编辑器
+.vscode/
+.idea/
+.DS_Store
