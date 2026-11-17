@@ -96,6 +96,31 @@ async function restore(item) {
   }
 }
 
+async function purge(item) {
+  try {
+    await ElMessageBox.confirm(
+      `确定要彻底删除「${item.category_l1_name} / ${item.category_l2_name} ¥${formatMoney(item.amount_cents)}」吗？\n\n彻底删除后无法恢复，也不会再出现在导出文件里。`,
+      '彻底删除',
+      {
+        confirmButtonText: '彻底删除',
+        cancelButtonText: '取消',
+        type: 'error',
+        confirmButtonClass: 'el-button--danger',
+      },
+    )
+  } catch {
+    return
+  }
+  try {
+    await api.purgeExpense(item.id)
+    ElMessage.success('已彻底删除')
+    store.changed()
+    load()
+  } catch (err) {
+    ElMessage.error(err.message || '彻底删除失败')
+  }
+}
+
 watch([categoryL1, includeDeleted], () => load())
 watch(keyword, () => {
   clearTimeout(keywordTimer)
@@ -166,6 +191,9 @@ onMounted(load)
             <div class="bill-actions">
               <template v-if="item.deleted_at">
                 <el-button size="small" text type="primary" @click="restore(item)">恢复</el-button>
+                <el-button size="small" text type="danger" :icon="Delete" @click="purge(item)">
+                  彻底删除
+                </el-button>
               </template>
               <template v-else>
                 <el-button size="small" text :icon="EditPen" @click="store.openDialog(item)">编辑</el-button>

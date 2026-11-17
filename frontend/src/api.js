@@ -37,6 +37,7 @@ export const api = {
   updateExpense: (id, body) => request(`/api/expenses/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
   deleteExpense: (id) => request(`/api/expenses/${id}`, { method: 'DELETE' }),
   restoreExpense: (id) => request(`/api/expenses/${id}/restore`, { method: 'POST' }),
+  purgeExpense: (id) => request(`/api/expenses/${id}/permanent`, { method: 'DELETE' }),
 
   summary: (month) => request(`/api/stats/summary?month=${encodeURIComponent(month)}`),
   trend: (months = 6) => request(`/api/stats/trend?months=${months}`),

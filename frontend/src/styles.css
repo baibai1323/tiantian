@@ -616,8 +616,9 @@ ul {
 .bill-actions {
   display: flex;
   gap: 2px;
-  width: 120px;
+  width: 152px;
   justify-content: flex-end;
+  flex-shrink: 0;
 }
 
 .load-more {

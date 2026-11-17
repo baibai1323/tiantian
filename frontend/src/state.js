@@ -1,4 +1,4 @@
-import { reactive } from 'vue'
+﻿import { reactive } from 'vue'
 import { api } from './api'
 
 export function currentMonth() {
@@ -14,7 +14,7 @@ export function shiftMonth(month, delta) {
 
 export function monthLabel(month) {
   const [y, m] = month.split('-')
-  return `${y} 年 ${Number(m)} 月`
+  return `${y} 骞?${Number(m)} 鏈坄
 }
 
 export function formatMoney(cents) {
@@ -25,12 +25,12 @@ export function formatMoney(cents) {
 export function formatDate(dateStr) {
   if (!dateStr) return ''
   const [y, m, d] = dateStr.split('-')
-  return `${Number(m)} 月 ${Number(d)} 日`
+  return `${Number(m)} 鏈?${Number(d)} 鏃
 }
 
 export const store = reactive({
   month: currentMonth(),
-  version: '0.2.0',
+  version: '0.3.0',
   categories: [],
   categoriesLoaded: false,
   dialogVisible: false,
@@ -58,3 +58,4 @@ export const store = reactive({
     this.refreshToken += 1
   },
 })
+

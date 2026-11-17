@@ -165,9 +165,9 @@ powershell -ExecutionPolicy Bypass -File scripts\build_windows.ps1
 产物：
 
 - `dist\TianTianJiZhang\`：免安装目录版，双击 `TianTianJiZhang.exe` 即可运行
-- `release\TianTianJiZhang-Setup-0.2.0.exe`：安装包（需先装 Inno Setup）
+- `release\TianTianJiZhang-Setup-0.3.0.exe`：安装包（需先装 Inno Setup）
 
-当前已构建并验证的免安装包：`release\TianTianJiZhang-0.2.0-win64-portable.zip`（约 22 MB）。v0.2.0 新增 CSV 导入；v0.1.1 修复了无控制台打包时 `Unable to configure formatter 'default'`（`sys.stderr` 为 None）的启动崩溃。
+当前已构建并验证的免安装包：`release\TianTianJiZhang-0.3.0-win64-portable.zip`（约 22 MB）。v0.3.0 新增“彻底删除”（回收站里可把记录真正抹掉，不自动清理）；v0.2.0 新增 CSV 导入；v0.1.1 修复了无控制台打包时 `Unable to configure formatter 'default'`（`sys.stderr` 为 None）的启动崩溃。
 
 > Windows 10/11 一般自带 WebView2 运行时；如果窗口白屏，请安装
 > [Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/)。
@@ -263,8 +263,9 @@ v0.1.0 的打包版在“无控制台”模式下启动时会踩到 uvicorn 日�
 | GET | `/api/expenses?month=YYYY-MM` | 账单列表（支持分类、搜索、分页） |
 | POST | `/api/expenses` | 新增一笔 |
 | PATCH | `/api/expenses/{id}` | 修改 |
-| DELETE | `/api/expenses/{id}` | 软删除 |
-| POST | `/api/expenses/{id}/restore` | 恢复 |
+| DELETE | `/api/expenses/{id}` | 软删除（移进回收站，可恢复） |
+| POST | `/api/expenses/{id}/restore` | 恢复（从回收站拿回来） |
+| DELETE | `/api/expenses/{id}/permanent` | 彻底删除（仅限已进回收站的记录，不可恢复） |
 | GET | `/api/stats/summary?month=YYYY-MM` | 月度汇总、分类占比、二级排行 |
 | GET | `/api/stats/trend?months=6` | 近 N 月趋势 |
 | GET | `/api/export/csv?month=YYYY-MM` | 导出 CSV |

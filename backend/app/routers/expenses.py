@@ -1,4 +1,4 @@
-"""账单接口：新增、查询、修改、软删除、恢复。"""
+"""账单接口：新增、查询、修改、软删除、恢复、彻底删除。"""
 
 from __future__ import annotations
 
@@ -134,6 +134,19 @@ def delete_expense(expense_id: int, session: Session = Depends(get_session)) -> 
     expense = _get_active_expense(session, expense_id)
     expense.deleted_at = iso_now()
     session.add(expense)
+    session.commit()
+    return {"ok": True}
+
+
+@router.delete("/{expense_id}/permanent")
+def purge_expense(expense_id: int, session: Session = Depends(get_session)) -> dict[str, bool]:
+    """彻底删除：只允许删除已进回收站（软删除）的记录，删掉后无法恢复。"""
+    expense = session.get(Expense, expense_id)
+    if expense is None:
+        raise HTTPException(status_code=404, detail="这笔记录不存在")
+    if expense.deleted_at is None:
+        raise HTTPException(status_code=400, detail="请先删除这笔记录，再彻底删除")
+    session.delete(expense)
     session.commit()
     return {"ok": True}
 
