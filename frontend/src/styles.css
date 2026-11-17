@@ -1210,3 +1210,151 @@ ul {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* ---------- 分类管理 ---------- */
+
+.category-page {
+  padding-bottom: 40px;
+}
+
+.cat-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.cat-head-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.cat-head-text h1 {
+  margin: 0 0 4px;
+  font-size: 22px;
+}
+
+.cat-head-text p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.cat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 120px;
+}
+
+.cat-group {
+  padding: 14px 18px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgb(180 140 60 / 8%);
+}
+
+.cat-group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cat-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.cat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: #fdf1dd;
+  color: #c9791a;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.cat-title strong {
+  font-size: 15px;
+}
+
+.cat-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.cat-children {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+  padding-left: 42px;
+}
+
+.cat-child {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 34px;
+  padding: 4px 10px;
+  border-radius: 10px;
+  background: #fdfaf4;
+}
+
+.cat-child-name {
+  font-size: 13px;
+  color: #4a4238;
+}
+
+.cat-child-count {
+  margin-left: auto;
+}
+
+.cat-child .cat-actions {
+  margin-left: 6px;
+}
+
+.cat-empty {
+  margin: 4px 0 0;
+}
+
+@media (max-width: 767px) {
+  .cat-head {
+    flex-wrap: wrap;
+  }
+
+  .cat-head-text {
+    order: 3;
+    flex-basis: 100%;
+  }
+
+  .cat-head > .el-button:last-child {
+    margin-left: auto;
+  }
+
+  .cat-children {
+    padding-left: 0;
+  }
+
+  .cat-child {
+    flex-wrap: wrap;
+  }
+
+  .cat-child-count {
+    margin-left: 0;
+  }
+
+  .cat-child .cat-actions {
+    margin-left: auto;
+  }
+}

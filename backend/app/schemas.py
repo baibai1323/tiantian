@@ -15,6 +15,30 @@ class CategoryNode(BaseModel):
     children: list["CategoryNode"] = Field(default_factory=list)
 
 
+class CategoryCreate(BaseModel):
+    parent_id: int | None = None
+    name: str
+    icon: str = ""
+
+
+class CategoryUpdate(BaseModel):
+    name: str | None = None
+    icon: str | None = None
+
+
+class CategoryManageNode(BaseModel):
+    id: int
+    name: str
+    icon: str
+    is_system: bool
+    expense_count: int = 0
+    children: list["CategoryManageNode"] = Field(default_factory=list)
+
+
+class CategoryDeleteResult(BaseModel):
+    migrated: int = 0
+
+
 class ExpenseIn(BaseModel):
     amount: Decimal
     category_l2: int

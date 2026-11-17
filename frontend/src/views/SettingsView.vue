@@ -1,10 +1,13 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { Download, FolderOpened, Lock, Upload } from '@element-plus/icons-vue'
+import { useRouter } from 'vue-router'
+import { Download, FolderOpened, Lock, Setting, Upload } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
 import { api } from '../api'
 import { store } from '../state'
+
+const router = useRouter()
 
 const health = ref(null)
 const loading = ref(true)
@@ -112,6 +115,19 @@ onMounted(async () => {
         >
           <el-button :icon="Upload" :loading="importing">选择 CSV 导入</el-button>
         </el-upload>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-label">
+          <el-icon><Setting /></el-icon>
+          <div>
+            <strong>分类管理</strong>
+            <p class="muted small">
+              新增、改名或删除自己创建的分类；系统自带的 10 个大类不能改。
+            </p>
+          </div>
+        </div>
+        <el-button :icon="Setting" @click="router.push('/settings/categories')">管理分类</el-button>
       </div>
     </section>
 

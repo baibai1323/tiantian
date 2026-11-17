@@ -17,9 +17,9 @@ Windows 与 macOS 共用一套代码，界面优先宽屏，同时适配小窗�
 | --- | --- |
 | ![统计](docs/screenshots/stats.png) | ![记一笔](docs/screenshots/dialog.png) |
 
-| 导入结果 | 桌面原生窗口 |
+| 导入结果 | 分类管理 |
 | --- | --- |
-| ![导入](docs/screenshots/import.png) | ![桌面窗口](docs/screenshots/desktop.png) |
+| ![导入](docs/screenshots/import.png) | ![分类管理](docs/screenshots/categories.png) |
 
 ## 目录结构
 
@@ -147,6 +147,7 @@ cd ..
 | 自动备份 | `<数据目录>\backups\`，最多 7 份 |
 | 导出 CSV | 设置页或账单页点「导出 CSV」，导出当前月份 |
 | 导入 CSV | 设置页「导入账单」，选择本应用导出的 CSV；重复记录自动跳过 |
+| 自定义分类 | 设置页「分类管理」，可新增一级/二级分类；自己建的能改名、删除，删除时账单归入「其他 / 未分类」 |
 
 - 每次启动会自动备份一次数据库。
 - 想换位置，可设置环境变量 `TIANTIAN_DATA_DIR` 指向新目录。
@@ -165,9 +166,9 @@ powershell -ExecutionPolicy Bypass -File scripts\build_windows.ps1
 产物：
 
 - `dist\TianTianJiZhang\`：免安装目录版，双击 `TianTianJiZhang.exe` 即可运行
-- `release\TianTianJiZhang-Setup-0.3.1.exe`：安装包（需先装 Inno Setup）
+- `release\TianTianJiZhang-Setup-0.4.0.exe`：安装包（需先装 Inno Setup）
 
-当前已构建并验证的免安装包：`release\TianTianJiZhang-0.3.1-win64-portable.zip`（约 22 MB）。v0.3.1 修复前端文案文件编码损坏导致的构建失败，并新增“彻底删除”（回收站里可把记录真正抹掉，不自动清理）；v0.2.0 新增 CSV 导入；v0.1.1 修复了无控制台打包时 `Unable to configure formatter 'default'`（`sys.stderr` 为 None）的启动崩溃。
+当前已构建并验证的免安装包：`release\TianTianJiZhang-0.4.0-win64-portable.zip`（约 22 MB）。v0.4.0 新增「分类管理」（自定义一级/二级分类，可改名、可删除，删除时账单一并迁到「其他 / 未分类」）；v0.3.1 修复前端文案文件编码损坏导致的构建失败，并新增“彻底删除”（回收站里可把记录真正抹掉，不自动清理）；v0.2.0 新增 CSV 导入；v0.1.1 修复了无控制台打包时 `Unable to configure formatter 'default'`（`sys.stderr` 为 None）的启动崩溃。
 
 > Windows 10/11 一般自带 WebView2 运行时；如果窗口白屏，请安装
 > [Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/)。
@@ -252,6 +253,9 @@ v0.1.0 的打包版在“无控制台”模式下启动时会踩到 uvicorn 日�
 **9. 同一个 CSV 导入两次会翻倍吗**
 不会。按「日期 + 金额 + 一级分类 + 二级分类 + 备注」判断，已存在的记录会跳过，结果框里会显示跳过了多少条。
 
+**10. 能自己加分类吗？删掉分类后账单会怎样**
+能。设置页 →「分类管理」可以新增一级/二级分类；系统自带的 10 个大类只能看，不能改名或删除；自己建的可以改名、删除。删除分类时，挂在它下面的账单会迁到「其他 / 未分类」，不会丢，确认框里会先告诉你有几笔。
+
 ## 八、接口速查
 
 启动后端后打开 <http://127.0.0.1:8000/docs> 可看交互式接口文档。
@@ -260,6 +264,10 @@ v0.1.0 的打包版在“无控制台”模式下启动时会踩到 uvicorn 日�
 | --- | --- | --- |
 | GET | `/api/health` | 健康检查、数据目录 |
 | GET | `/api/categories` | 两级分类树 |
+| GET | `/api/categories/manage` | 分类管理视图（含每类账单数） |
+| POST | `/api/categories` | 新增分类（`parent_id` 为空即一级） |
+| PATCH | `/api/categories/{id}` | 改名（系统分类 403） |
+| DELETE | `/api/categories/{id}` | 删除自定义分类，账单迁到「其他 / 未分类」（系统分类 403） |
 | GET | `/api/expenses?month=YYYY-MM` | 账单列表（支持分类、搜索、分页） |
 | POST | `/api/expenses` | 新增一笔 |
 | PATCH | `/api/expenses/{id}` | 修改 |

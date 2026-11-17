@@ -25,6 +25,10 @@ async function request(path, options = {}) {
 export const api = {
   health: () => request('/api/health'),
   categories: () => request('/api/categories'),
+  manageCategories: () => request('/api/categories/manage'),
+  createCategory: (body) => request('/api/categories', { method: 'POST', body: JSON.stringify(body) }),
+  updateCategory: (id, body) => request(`/api/categories/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+  deleteCategory: (id) => request(`/api/categories/${id}`, { method: 'DELETE' }),
 
   expenses: (params = {}) => {
     const qs = new URLSearchParams()

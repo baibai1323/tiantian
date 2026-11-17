@@ -17,6 +17,9 @@ const navItems = [
 ]
 
 const pageTitle = computed(() => route.meta.title || '天天记账')
+function isNavActive(path) {
+  return path === '/' ? route.path === '/' : route.path === path || route.path.startsWith(`${path}/`)
+}
 const todayText = computed(() => {
   const d = new Date()
   const weeks = ['日', '一', '二', '三', '四', '五', '六']
@@ -46,8 +49,7 @@ onMounted(() => {
           :key="item.path"
           :to="item.path"
           class="nav-item"
-          active-class="is-active"
-          :exact-active-class="item.path === '/' ? 'is-active' : ''"
+          :class="{ 'is-active': isNavActive(item.path) }"
         >
           <el-icon :size="19"><component :is="item.icon" /></el-icon>
           <span>{{ item.label }}</span>
