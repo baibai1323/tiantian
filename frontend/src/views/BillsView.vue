@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Download, Search, Delete, EditPen, Plus } from '@element-plus/icons-vue'
 
@@ -8,6 +8,7 @@ import { api } from '../api'
 import { store, formatMoney, formatDate } from '../state'
 
 const route = useRoute()
+const router = useRouter()
 
 const items = ref([])
 const total = ref(0)
@@ -16,7 +17,6 @@ const loading = ref(true)
 const loadingMore = ref(false)
 const categoryL1 = ref(route.query.category_l1 ? Number(route.query.category_l1) : '')
 const keyword = ref('')
-const includeDeleted = ref(false)
 
 const PAGE_SIZE = 100
 let keywordTimer = null
@@ -46,7 +46,6 @@ async function load(reset = true) {
       month: store.month,
       category_l1: categoryL1.value || '',
       q: keyword.value.trim(),
-      include_deleted: includeDeleted.value ? 'true' : '',
       limit: PAGE_SIZE,
       offset: reset ? 0 : items.value.length,
     })
@@ -68,16 +67,16 @@ function exportCsv() {
 async function remove(item) {
   try {
     await ElMessageBox.confirm(
-      `删除「${item.category_l2_name} ¥${formatMoney(item.amount_cents)}」这笔记录？`,
-      '确认删除',
-      { confirmButtonText: '删除', cancelButtonText: '再想想', type: 'warning' },
+      `删除「${item.category_l2_name} ¥${formatMoney(item.amount_cents)}」这笔记录？删除后会移入「回收站」，不是永久删除；要恢复或彻底删除，请到回收站里操作。`,
+      '移入回收站',
+      { confirmButtonText: '移入回收站', cancelButtonText: '再想想', type: 'warning' },
     )
   } catch {
     return
   }
   try {
     await api.deleteExpense(item.id)
-    ElMessage.success('已删除')
+    ElMessage.success('已移入回收站')
     store.changed()
     load()
   } catch (err) {
@@ -85,43 +84,7 @@ async function remove(item) {
   }
 }
 
-async function restore(item) {
-  try {
-    await api.restoreExpense(item.id)
-    ElMessage.success('已恢复')
-    store.changed()
-    load()
-  } catch (err) {
-    ElMessage.error(err.message || '恢复失败')
-  }
-}
-
-async function purge(item) {
-  try {
-    await ElMessageBox.confirm(
-      `确定要彻底删除「${item.category_l1_name} / ${item.category_l2_name} ¥${formatMoney(item.amount_cents)}」吗？\n\n彻底删除后无法恢复，也不会再出现在导出文件里。`,
-      '彻底删除',
-      {
-        confirmButtonText: '彻底删除',
-        cancelButtonText: '取消',
-        type: 'error',
-        confirmButtonClass: 'el-button--danger',
-      },
-    )
-  } catch {
-    return
-  }
-  try {
-    await api.purgeExpense(item.id)
-    ElMessage.success('已彻底删除')
-    store.changed()
-    load()
-  } catch (err) {
-    ElMessage.error(err.message || '彻底删除失败')
-  }
-}
-
-watch([categoryL1, includeDeleted], () => load())
+watch(categoryL1, () => load())
 watch(keyword, () => {
   clearTimeout(keywordTimer)
   keywordTimer = setTimeout(() => load(), 300)
@@ -144,8 +107,8 @@ onMounted(load)
           clearable
           class="filter-search"
         />
-        <el-checkbox v-model="includeDeleted" class="filter-deleted">显示已删除</el-checkbox>
         <div class="filter-actions">
+          <el-button :icon="Delete" text @click="router.push('/trash')">回收站</el-button>
           <el-button :icon="Download" @click="exportCsv">导出 CSV</el-button>
           <el-button type="primary" :icon="Plus" @click="store.openDialog()">记一笔</el-button>
         </div>
@@ -177,28 +140,18 @@ onMounted(load)
             v-for="item in group.list"
             :key="item.id"
             class="bill-item"
-            :class="{ 'is-deleted': item.deleted_at }"
           >
             <div class="bill-icon">{{ item.category_l2_name.slice(0, 1) }}</div>
             <div class="bill-body">
               <div class="bill-title">
                 <span>{{ item.category_l1_name }} / {{ item.category_l2_name }}</span>
-                <el-tag v-if="item.deleted_at" size="small" type="info">已删除</el-tag>
               </div>
               <div class="bill-note">{{ item.note || '无备注' }}</div>
             </div>
             <div class="bill-amount">¥{{ formatMoney(item.amount_cents) }}</div>
             <div class="bill-actions">
-              <template v-if="item.deleted_at">
-                <el-button size="small" text type="primary" @click="restore(item)">恢复</el-button>
-                <el-button size="small" text type="danger" :icon="Delete" @click="purge(item)">
-                  彻底删除
-                </el-button>
-              </template>
-              <template v-else>
-                <el-button size="small" text :icon="EditPen" @click="store.openDialog(item)">编辑</el-button>
-                <el-button size="small" text type="danger" :icon="Delete" @click="remove(item)">删除</el-button>
-              </template>
+              <el-button size="small" text :icon="EditPen" @click="store.openDialog(item)">编辑</el-button>
+              <el-button size="small" text type="danger" :icon="Delete" @click="remove(item)">删除</el-button>
             </div>
           </li>
         </ul>

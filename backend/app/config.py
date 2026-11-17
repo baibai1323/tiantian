@@ -8,7 +8,7 @@ from pathlib import Path
 
 APP_NAME = "TianTianJiZhang"
 APP_DISPLAY_NAME = "天天记账"
-APP_VERSION = "0.4.0"
+APP_VERSION = "0.5.0"
 
 
 def default_data_dir() -> Path:

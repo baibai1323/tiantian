@@ -506,6 +506,42 @@ ul {
 
 /* ---------- 账单 ---------- */
 
+/* ---------- 回收站 ---------- */
+
+.trash-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 22px;
+}
+
+.trash-sub {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.trash-list-card {
+  padding: 8px 0 4px;
+}
+
+.trash-summary {
+  padding: 10px 22px 14px;
+  color: var(--muted);
+  font-size: 13px;
+  border-bottom: 1px dashed var(--line);
+}
+
+.trash-summary strong {
+  color: var(--text);
+}
+
+.trash-empty {
+  padding: 42px 20px;
+}
+
 .filter-card {
   padding: 16px 20px;
 }
@@ -1056,6 +1092,19 @@ ul {
 
   .filter-card {
     padding: 14px;
+  }
+
+  .trash-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .trash-head .el-button {
+    width: 100%;
+  }
+
+  .trash-summary {
+    padding: 8px 14px 12px;
   }
 
   .filter-select,
