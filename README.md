@@ -181,7 +181,11 @@ powershell -ExecutionPolicy Bypass -File scripts\build_windows.ps1
 3. 等约 5–10 分钟，任务完成后在该次运行页面底部下载：
    - `TianTian-macOS-AppleSilicon`：Apple 芯片（M1/M2/M3/M4）用
    - `TianTian-macOS-Intel`：Intel 芯片用
+   下载得到的 zip 里还套着一层同名 zip（GitHub 会自动再压一次），解压两层就是 `TianTianJiZhang.app`。
 4. 解压得到 `TianTianJiZhang.app`，拖进「应用程序」文件夹。
+
+> 仓库里的 `release/mac/` 已放好这两个包（`apple.zip` / `intel.zip`），不用再自己跑 Actions。
+> 两个包已在 Windows 上校验：zip 结构完整，主程序分别是 arm64 / x86_64；尚未在真机 Mac 上启动过。
 
 > 这个包没有 Apple 开发者签名，第一次打开会被 macOS 拦下。解决办法：
 > 右键点 App →「打开」→ 再点「打开」；或到「系统设置 → 隐私与安全性」点「仍要打开」。
