@@ -12,7 +12,7 @@ from ..db import get_session
 from ..models import Expense
 from ..schemas import CategoryStat, StatsSummary, TrendPoint
 from ..services import load_categories, to_expense_out
-from ..utils import cents_to_yuan, current_month, is_valid_month, today_str
+from ..utils import cents_to_yuan, current_month, is_valid_month, normalize_month, today_str
 
 router = APIRouter(prefix="/api/stats", tags=["stats"])
 
@@ -24,6 +24,7 @@ def summary(
 ) -> StatsSummary:
     if month is None:
         month = current_month()
+    month = normalize_month(month)
     if not is_valid_month(month):
         raise HTTPException(status_code=400, detail="月份格式应为 YYYY-MM")
 
@@ -36,13 +37,17 @@ def summary(
     count = int(
         session.exec(select(func.count()).select_from(Expense).where(*month_conditions)).one()
     )
-    today_cents = int(
-        session.exec(
-            select(func.coalesce(func.sum(Expense.amount_cents), 0)).where(
-                Expense.deleted_at.is_(None), Expense.spent_on == today_str()
-            )
-        ).one()
-    )
+    # 「今天花了多少」只对当前月有意义；查历史月份时返回 0，避免把今天的支出算进别的月份
+    this_month = current_month()
+    today_cents = 0
+    if month == this_month:
+        today_cents = int(
+            session.exec(
+                select(func.coalesce(func.sum(Expense.amount_cents), 0)).where(
+                    Expense.deleted_at.is_(None), Expense.spent_on == today_str()
+                )
+            ).one()
+        )
 
     by_l1_rows = session.exec(
         select(Expense.category_l1, func.sum(Expense.amount_cents))

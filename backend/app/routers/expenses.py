@@ -10,7 +10,14 @@ from ..db import get_session
 from ..models import Category, Expense
 from ..schemas import ExpenseIn, ExpenseListOut, ExpenseOut, ExpensePatch
 from ..services import load_categories, to_expense_out
-from ..utils import cents_to_yuan, current_month, is_valid_month, iso_now, yuan_to_cents
+from ..utils import (
+    cents_to_yuan,
+    current_month,
+    is_valid_month,
+    iso_now,
+    normalize_month,
+    yuan_to_cents,
+)
 
 router = APIRouter(prefix="/api/expenses", tags=["expenses"])
 
@@ -45,6 +52,7 @@ def list_expenses(
 ) -> ExpenseListOut:
     if month is None:
         month = current_month()
+    month = normalize_month(month)
     if not is_valid_month(month):
         raise HTTPException(status_code=400, detail="月份格式应为 YYYY-MM")
 

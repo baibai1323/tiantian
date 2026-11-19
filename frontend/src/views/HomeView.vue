@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { Plus, ArrowRight } from '@element-plus/icons-vue'
 
 import { api } from '../api'
-import { store, formatMoney, formatDate, monthLabel } from '../state'
+import { store, formatMoney, formatDate, monthLabel, currentMonth } from '../state'
 
 const router = useRouter()
 const loading = ref(true)
@@ -19,9 +19,17 @@ const byL1 = computed(() => (summary.value ? summary.value.by_l1 : []))
 
 const maxL1 = computed(() => Math.max(...byL1.value.map((x) => x.total_cents), 1))
 
+const isThisMonth = computed(() => store.month === currentMonth())
+
+function daysInMonth(month) {
+  const [y, m] = month.split('-').map(Number)
+  return new Date(y, m, 0).getDate()
+}
+
 const avgPerDay = computed(() => {
-  const day = new Date().getDate()
-  return Math.round(total.value / Math.max(day, 1))
+  // 当月按已过天数算，历史月份按整月天数算
+  const days = isThisMonth.value ? new Date().getDate() : daysInMonth(store.month)
+  return Math.round(total.value / Math.max(days, 1))
 })
 
 async function load() {
@@ -55,8 +63,8 @@ onMounted(load)
           <span class="hero-number">{{ formatMoney(total) }}</span>
         </div>
         <div class="hero-meta">
-          <span>今天 <strong>¥{{ formatMoney(today) }}</strong></span>
-          <span class="dot">·</span>
+          <span v-if="isThisMonth">今天 <strong>¥{{ formatMoney(today) }}</strong></span>
+          <span v-if="isThisMonth" class="dot">·</span>
           <span>共 <strong>{{ count }}</strong> 笔</span>
           <span class="dot">·</span>
           <span>日均 <strong>¥{{ formatMoney(avgPerDay) }}</strong></span>

@@ -12,7 +12,7 @@ from sqlmodel import Session, select
 from ..db import get_session
 from ..models import Expense
 from ..services import load_categories
-from ..utils import cents_to_yuan, is_valid_month
+from ..utils import cents_to_yuan, is_valid_month, normalize_month
 
 router = APIRouter(prefix="/api/export", tags=["export"])
 
@@ -24,6 +24,7 @@ def export_csv(
 ) -> StreamingResponse:
     conditions = [Expense.deleted_at.is_(None)]
     if month:
+        month = normalize_month(month)
         if not is_valid_month(month):
             from fastapi import HTTPException
 

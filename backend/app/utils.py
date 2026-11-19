@@ -35,3 +35,15 @@ def is_valid_month(value: str) -> bool:
         return True
     except ValueError:
         return False
+
+
+def normalize_month(value: str) -> str:
+    """把 "2026-1" 这种没补零的月份统一成 "YYYY-MM"。
+
+    不合法时原样返回，交给 is_valid_month 判定，避免这里先抛异常。
+    """
+    try:
+        year, month = value.split("-")
+        return f"{int(year):04d}-{int(month):02d}"
+    except (AttributeError, ValueError):
+        return value
