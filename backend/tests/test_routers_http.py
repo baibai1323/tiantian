@@ -93,3 +93,51 @@ def test_summary_http_normalizes_month(client, seeded):
     assert resp.status_code == 200
     body = resp.json()
     assert (body["month"], body["total_cents"]) == ("2026-01", 2800)
+
+
+def test_list_expenses_rejects_non_four_digit_month(client):
+    # "26-1" 以前会被补成 "0026-01"，当作合法月份。
+    resp = client.get("/api/expenses", params={"month": "26-1"})
+
+    assert resp.status_code == 400
+
+
+def test_create_expense_rejects_unpadded_date(client, seeded):
+    lunch = category_id(seeded, "午餐")
+    resp = client.post(
+        "/api/expenses",
+        json={"amount": "12.50", "category_l2": lunch, "spent_on": "2026-1-5", "note": ""},
+    )
+
+    assert resp.status_code == 422
+
+
+def test_create_expense_rejects_amount_over_limit(client, seeded):
+    lunch = category_id(seeded, "午餐")
+    resp = client.post(
+        "/api/expenses",
+        json={"amount": "10000000.00", "category_l2": lunch, "spent_on": "2026-01-05"},
+    )
+
+    assert resp.status_code == 422
+
+
+def test_patch_expense_rejects_amount_over_limit(client, seeded):
+    add_expense(seeded, 1250, "2026-01-05")
+    expense = seeded.exec(select(Expense)).first()
+    assert expense is not None
+
+    resp = client.patch(f"/api/expenses/{expense.id}", json={"amount": "10000000.00"})
+
+    assert resp.status_code == 422
+
+
+def test_search_escapes_like_wildcards(client, seeded):
+    add_expense(seeded, 100, "2026-01-05", note="折扣 100%")
+    add_expense(seeded, 200, "2026-01-06", note="普通备注")
+
+    percent = client.get("/api/expenses", params={"month": "2026-01", "q": "%"})
+    underscore = client.get("/api/expenses", params={"month": "2026-01", "q": "_"})
+
+    assert percent.json()["total"] == 1
+    assert underscore.json()["total"] == 0

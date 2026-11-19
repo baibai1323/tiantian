@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from datetime import date, datetime
 from decimal import ROUND_HALF_UP, Decimal
 
@@ -40,10 +41,13 @@ def is_valid_month(value: str) -> bool:
 def normalize_month(value: str) -> str:
     """把 "2026-1" 这种没补零的月份统一成 "YYYY-MM"。
 
-    不合法时原样返回，交给 is_valid_month 判定，避免这里先抛异常。
+    只接受“4 位年 + 1~2 位月”的形状，其余原样返回，交给 is_valid_month 判定；
+    避免 "26-1" 被补成 "0026-01" 这种看似合法、实际毫无意义的值。
     """
-    try:
-        year, month = value.split("-")
-        return f"{int(year):04d}-{int(month):02d}"
-    except (AttributeError, ValueError):
+    match = re.fullmatch(r"(\d{4})-(\d{1,2})", value)
+    if match is None:
         return value
+    year, month = int(match.group(1)), int(match.group(2))
+    if not 1 <= month <= 12:
+        return value
+    return f"{year:04d}-{month:02d}"

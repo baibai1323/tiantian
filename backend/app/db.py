@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import shutil
+import sqlite3
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -33,8 +33,10 @@ def _enable_sqlite_pragma(dbapi_connection, _connection_record) -> None:
 
 
 def _backup_existing_db() -> Path | None:
-    """启动时把已有数据库复制一份到 backups/，只保留最近 7 份。
+    """启动时把已有数据库备份一份到 backups/，只保留最近 7 份。
 
+    用 sqlite3 的 backup API 而不是直接复制文件：WAL 模式下最近提交的数据
+    可能还在 tiantian.db-wal 里，只复制主文件会得到一个缺数据的备份。
     备份是“锦上添花”，失败（杀软占用、权限、磁盘满）不能阻止应用启动。
     """
     if not DB_PATH.exists() or DB_PATH.stat().st_size == 0:
@@ -43,13 +45,14 @@ def _backup_existing_db() -> Path | None:
         BACKUP_DIR.mkdir(parents=True, exist_ok=True)
         stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         target = BACKUP_DIR / f"tiantian-{stamp}.db"
-        shutil.copy2(DB_PATH, target)
+        with sqlite3.connect(DB_PATH) as source, sqlite3.connect(target) as dest:
+            source.backup(dest)
 
         backups = sorted(BACKUP_DIR.glob("tiantian-*.db"))
         for old in backups[:-MAX_BACKUPS]:
             old.unlink(missing_ok=True)
         return target
-    except OSError as exc:  # 备份失败只提示，不中断启动
+    except (OSError, sqlite3.Error) as exc:  # 备份失败只提示，不中断启动
         print(f"启动备份失败（不影响使用）：{exc}", file=sys.stderr)
         return None
 

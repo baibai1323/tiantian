@@ -207,9 +207,9 @@ powershell -ExecutionPolicy Bypass -File scripts\build_windows.ps1
 产物：
 
 - `dist\TianTianJiZhang\`：免安装目录版，双击 `TianTianJiZhang.exe` 即可运行
-- `release\TianTianJiZhang-Setup-0.5.0.exe`：安装包（需先装 Inno Setup）
+- `release\TianTianJiZhang-Setup-0.5.1.exe`：安装包（需先装 Inno Setup）
 
-当前已构建并验证的免安装包：`release\天天记账-Windows-0.5.0-免安装版.zip`（约 23 MB）。v0.5.0 把回收站做成独立页面（侧栏入口、笔数与合计、恢复 / 彻底删除 / 一键清空），删除确认明确写“移入回收站，不是永久删除”；v0.4.0 新增「分类管理」（自定义一级/二级分类，可改名、可删除，删除时账单一并迁到「其他 / 未分类」）；v0.3.1 修复前端文案文件编码损坏导致的构建失败，并新增“彻底删除”；v0.2.0 新增 CSV 导入；v0.1.1 修复了无控制台打包时 `Unable to configure formatter 'default'`（`sys.stderr` 为 None）的启动崩溃。
+当前已构建并验证的免安装包：`release\天天记账-Windows-0.5.1-免安装版.zip`（约 23 MB）。v0.5.1 修了 5 个数据边界问题（日期必须补零、修改金额补上限、搜索转义 `%`/`_`、拒绝 `26-1` 这类假月份、备份改用 SQLite 在线备份以免丢 WAL 数据）；v0.5.0 把回收站做成独立页面（侧栏入口、笔数与合计、恢复 / 彻底删除 / 一键清空），删除确认明确写“移入回收站，不是永久删除”；v0.4.0 新增「分类管理」（自定义一级/二级分类，可改名、可删除，删除时账单一并迁到「其他 / 未分类」）；v0.3.1 修复前端文案文件编码损坏导致的构建失败，并新增“彻底删除”；v0.2.0 新增 CSV 导入；v0.1.1 修复了无控制台打包时 `Unable to configure formatter 'default'`（`sys.stderr` 为 None）的启动崩溃。
 
 > Windows 10/11 一般自带 WebView2 运行时；如果窗口白屏，请安装
 > [Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/)。
@@ -286,7 +286,7 @@ python3 -m venv .venv
 说明 PyWebView 的原生后端加载失败。先确认 Python 是 3.12；仍失败时用 `run.py --no-window` 走浏览器模式，功能完全一样。
 
 **7. 双击 exe 弹 `Unhandled exception ... Unable to configure formatter 'default'`**
-v0.1.0 的打包版在“无控制台”模式下启动时会踩到 uvicorn 日志组件的一个问题（`sys.stderr` 为 None）。v0.1.1 起已修复：启动时把 stdout/stderr 接到空设备，并让启动备份失败不阻断应用。请使用最新的 `release\天天记账-Windows-0.5.0-免安装版.zip`。
+v0.1.0 的打包版在“无控制台”模式下启动时会踩到 uvicorn 日志组件的一个问题（`sys.stderr` 为 None）。v0.1.1 起已修复：启动时把 stdout/stderr 接到空设备，并让启动备份失败不阻断应用。请使用最新的 `release\天天记账-Windows-0.5.1-免安装版.zip`。
 
 **8. 导入 CSV 时提示“缺少列”或很多无效行**
 请用本应用「导出 CSV」得到的文件，不要自己改列名。必填列是：`日期,一级分类,二级分类,金额(元)`，`备注` 可选；日期支持 `2026-11-16`、`2026/11/16`、`2026.11.16`。分类名必须和设置页里的完全一致；对不上的会归入「其他 / 未分类」并在结果里提示。

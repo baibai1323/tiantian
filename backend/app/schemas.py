@@ -7,6 +7,24 @@ from decimal import Decimal
 
 from pydantic import BaseModel, Field, field_validator
 
+MAX_AMOUNT = Decimal("9999999.99")
+
+
+def _normalize_date(value: str) -> str:
+    """校验并统一成 YYYY-MM-DD。
+
+    strptime 会接受 "2026-1-5" 这种没补零的写法，但数据库里存进去后
+    按月前缀查询（LIKE '2026-01-%'）就再也查不到这笔账，所以这里必须
+    严格按补零格式回写。
+    """
+    try:
+        parsed = datetime.strptime(value, "%Y-%m-%d")
+    except ValueError as exc:
+        raise ValueError("日期格式应为 YYYY-MM-DD") from exc
+    if parsed.strftime("%Y-%m-%d") != value:
+        raise ValueError("日期格式应为 YYYY-MM-DD（月和日要补零）")
+    return value
+
 
 class CategoryNode(BaseModel):
     id: int
@@ -52,18 +70,14 @@ class ExpenseIn(BaseModel):
             raise ValueError("金额必须大于 0")
         if value.as_tuple().exponent < -2:
             raise ValueError("金额最多两位小数")
-        if value > Decimal("9999999.99"):
+        if value > MAX_AMOUNT:
             raise ValueError("金额过大")
         return value
 
     @field_validator("spent_on")
     @classmethod
     def _check_date(cls, value: str) -> str:
-        try:
-            datetime.strptime(value, "%Y-%m-%d")
-        except ValueError as exc:
-            raise ValueError("日期格式应为 YYYY-MM-DD") from exc
-        return value
+        return _normalize_date(value)
 
     @field_validator("note")
     @classmethod
@@ -86,6 +100,8 @@ class ExpensePatch(BaseModel):
             raise ValueError("金额必须大于 0")
         if value.as_tuple().exponent < -2:
             raise ValueError("金额最多两位小数")
+        if value > MAX_AMOUNT:
+            raise ValueError("金额过大")
         return value
 
     @field_validator("spent_on")
@@ -93,11 +109,7 @@ class ExpensePatch(BaseModel):
     def _check_date(cls, value: str | None) -> str | None:
         if value is None:
             return None
-        try:
-            datetime.strptime(value, "%Y-%m-%d")
-        except ValueError as exc:
-            raise ValueError("日期格式应为 YYYY-MM-DD") from exc
-        return value
+        return _normalize_date(value)
 
     @field_validator("note")
     @classmethod

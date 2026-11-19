@@ -22,6 +22,11 @@ from ..utils import (
 router = APIRouter(prefix="/api/expenses", tags=["expenses"])
 
 
+def _escape_like(value: str) -> str:
+    """转义 LIKE 通配符，避免用户搜 "%" 时把全部记录都匹配出来。"""
+    return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+
 def _get_active_expense(session: Session, expense_id: int) -> Expense:
     expense = session.get(Expense, expense_id)
     if expense is None or expense.deleted_at is not None:
@@ -63,8 +68,8 @@ def list_expenses(
         conditions.append(Expense.category_l1 == category_l1)
     if category_l2 is not None:
         conditions.append(Expense.category_l2 == category_l2)
-    if q:
-        conditions.append(Expense.note.like(f"%{q.strip()}%"))
+    if q and q.strip():
+        conditions.append(Expense.note.like(f"%{_escape_like(q.strip())}%", escape="\\"))
 
     total = session.exec(select(func.count()).select_from(Expense).where(*conditions)).one()
     sum_cents = session.exec(
