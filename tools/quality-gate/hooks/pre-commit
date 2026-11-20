@@ -1,0 +1,16 @@
+#!/bin/sh
+# 天天记账 · 提交门禁
+#
+# 由 tools/quality-gate/install_hooks.py 复制到 .git/hooks/pre-commit。
+# 真正干活的是 gate.py，这里只负责两件事：
+#   1. 把工作目录切到仓库根目录（git 一般已经在这，但不保证）
+#   2. 找到项目的虚拟环境解释器，找不到就退回 PATH 里的 python
+#
+# 用 LF 换行保存。CRLF 会让 sh 把 \r 当成命令的一部分，报 "bad interpreter"。
+
+cd "$(git rev-parse --show-toplevel)" || exit 1
+
+PY=".venv/Scripts/python.exe"
+[ -x "$PY" ] || PY="python"
+
+exec "$PY" tools/quality-gate/gate.py
