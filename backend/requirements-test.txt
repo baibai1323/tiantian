@@ -1,0 +1,7 @@
+# 仅测试环境用的依赖：不装 pywebview（Linux 上它要编译 GUI 依赖），
+# 测试只覆盖 FastAPI + SQLModel 的接口层，用不到桌面窗口。
+fastapi>=0.110
+uvicorn[standard]>=0.29
+sqlmodel>=0.0.16
+pytest>=8
+httpx>=0.27
