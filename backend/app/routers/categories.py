@@ -101,7 +101,7 @@ def _fallback_pair(session: Session) -> tuple[Category, Category]:
             .where(Category.parent_id == root.id)
             .order_by(Category.sort_order, Category.id)
         ).first()
-    # sort_order 是用户拖动排序时写入的序号，越小越靠前；序号相同再按 id 排。
+    # sort_order 由种子数据或新增分类时写入，越小越靠前；序号相同再按 id 排。
     if child is None:
         raise HTTPException(status_code=500, detail="缺少「其他」下的兜底小类，请检查数据")
     # 返回值是元组解包用的两个对象：调用方会写成 `l1, l2 = _fallback_pair(session)`。
@@ -229,7 +229,7 @@ def create_category(
     # 同一级下不能重名，否则前端按名字回显时会分不清是哪一个。
     _ensure_unique(session, parent_id, name)
 
-    # 取同级当前最大的排序号：新分类排到最后，用户之后可以拖动调整。
+    # 取同级当前最大的排序号，让新分类排在最后（当前版本不支持拖动调整顺序）。
     # 这里用条件表达式区分「一级（parent_id 为 NULL）」和「某个父分类下」两种情况。
     max_order = session.exec(
         select(func.max(Category.sort_order)).where(
@@ -237,7 +237,7 @@ def create_category(
         )
     ).one()
     # `int(max_order or 0) + 1`：该层还没有任何分类时 max 返回 NULL，用 0 兜底；
-    # 得到的排序号从 1 开始，0 留给种子数据或特殊情况。
+    # 种子分类的 sort_order 是 100、200…（二级是 10、20…），新分类从 1 开始往后排。
     category = Category(
         parent_id=parent_id,
         name=name,

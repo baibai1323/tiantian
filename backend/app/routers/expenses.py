@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from sqlmodel import Session, select
 
 from ..db import get_session
@@ -118,7 +118,17 @@ def list_expenses(
     if q and q.strip():
         # 传入 escape 参数是告诉数据库「用反斜杠识别转义符」，配合 _escape_like 一起用，
         # 否则用户搜 "%" 会把全部账单都匹配出来。
-        conditions.append(Expense.note.like(f"%{_escape_like(q.strip())}%", escape="\\"))
+        keyword = f"%{_escape_like(q.strip())}%"
+        note_cond = Expense.note.like(keyword, escape="\\")
+        # 前端占位符写的是「搜备注、二级分类」，所以分类名也要能搜到：
+        # 先按名字查出匹配的分类 id，再把「备注命中 或 二级分类命中」合并成一个条件。
+        matched_l2 = session.exec(
+            select(Category.id).where(Category.name.like(keyword, escape="\\"))
+        ).all()
+        if matched_l2:
+            conditions.append(or_(note_cond, Expense.category_l2.in_(matched_l2)))
+        else:
+            conditions.append(note_cond)
 
     # 分两次查：一次只要总数，一次只要当前页数据。
     # 合计金额用 coalesce(sum(...), 0)：没有记录时 sum 返回 NULL，包一层变成 0。

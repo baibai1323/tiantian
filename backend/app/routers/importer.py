@@ -95,6 +95,18 @@ def _parse_date(raw: str) -> str | None:
     return None
 
 
+def _undo_formula_guard(value: str) -> str:
+    """还原导出时给公式文本加的前导单引号，避免导回来多一个「'」。
+
+    导出侧会把以 = + - @ 开头的备注写成 "'=..."，Excel 打开时按文本显示；
+    本工具再导入时要把这个「文本标记」去掉，否则数据会被悄悄改写。
+    只去掉「单引号 + 危险字符」这一种组合，正常的单引号开头备注不受影响。
+    """
+    if len(value) >= 2 and value[0] == "'" and value[1] in ("=", "+", "-", "@", "\t", "\r"):
+        return value[1:]
+    return value
+
+
 def _parse_cents(raw: str) -> int | None:
     """把金额文本解析成整数「分」，并校验上下限。
 
@@ -226,8 +238,8 @@ def import_csv(payload: ImportRequest, session: Session = Depends(get_session)) 
 
         # 分类名先按文本匹配。CSV 里没有 id，只能靠名字找；
         # 注意去掉首尾空格，否则「餐饮 」和「餐饮」会被当成两个分类。
-        l1_name = (raw_row.get(columns["l1"], "") or "").strip()
-        l2_name = (raw_row.get(columns["l2"], "") or "").strip()
+        l1_name = _undo_formula_guard((raw_row.get(columns["l1"], "") or "").strip())
+        l2_name = _undo_formula_guard((raw_row.get(columns["l2"], "") or "").strip())
         l1_id = l1_by_name.get(l1_name)
         # 二级分类必须同时匹配「父 id + 名字」，否则「其他」会串到别的分类下面。
         # l1_id 可能是 None，这时不能拿去当字典键查二级。
@@ -239,7 +251,7 @@ def import_csv(payload: ImportRequest, session: Session = Depends(get_session)) 
 
         # 备注截断到 200 字，和接口层 note 字段的上限保持一致；
         # columns.get("note", "") 兼容「表里根本没有备注列」的情况。
-        note = (raw_row.get(columns.get("note", ""), "") or "").strip()[:200]
+        note = _undo_formula_guard((raw_row.get(columns.get("note", ""), "") or "").strip())[:200]
         # 组装去重键。注意这里用的是「落库后」的分类 id：如果某行走了兜底，
         # 它的键就是兜底分类的 id，这样和之前已经落到兜底的同一笔也能正确判重。
         key = (spent_on, amount_cents, l1_id, l2_id, note)

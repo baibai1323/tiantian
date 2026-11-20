@@ -208,7 +208,7 @@ class ExpenseListOut(BaseModel):
     """分页后的账目列表。
 
     total 是满足筛选条件的总条数（用来算总页数），items 只是当前这一页；
-    sum_cents / sum_yuan 是这一页金额的合计。
+    sum_cents / sum_yuan 是「当前筛选条件下全部记录」的金额合计，不是这一页的合计。
     """
     items: list[ExpenseOut]
     total: int

@@ -2,7 +2,11 @@
 ; 用法：先运行 scripts\build_windows.ps1，或用 ISCC.exe 编译本文件。
 
 #define MyAppName "天天记账"
-#define MyAppVersion "0.1.0"
+; 版本号由 build_windows.ps1 从 backend/app/config.py 读取后通过 /DMyAppVersion 传入；
+; 直接双击 ISCC 编译时才用下面的兜底值，避免脚本单独跑时报「未定义」。
+#ifndef MyAppVersion
+  #define MyAppVersion "0.0.0"
+#endif
 #define MyAppPublisher "TianTian"
 #define MyAppExeName "TianTianJiZhang.exe"
 

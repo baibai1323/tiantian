@@ -22,6 +22,8 @@ frontend/dist/
 *.db-shm
 backups/
 *.log
+.coverage
+*.coverage
 
 # ç¼–è¾‘å™¨
 .vscode/
@@ -34,6 +36,6 @@ backups/
 .tmp/
 lan.enabled
 
-# Ó¦ÓÃÔËĞĞÊ±ÁÙÊ±Ä¿Â¼£¨WebView2£©
+# åº”ç”¨è¿è¡Œæ—¶ä¸´æ—¶ç›®å½•ï¼ˆWebView2ï¼‰
 /tmp*/
 EBWebView/

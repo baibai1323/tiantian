@@ -1,4 +1,4 @@
-﻿# Windows 打包脚本：构建前端 -> PyInstaller 目录版 -> Inno Setup 安装包（可选）
+# Windows 打包脚本：构建前端 -> PyInstaller 目录版 -> Inno Setup 安装包（可选）
 $ErrorActionPreference = 'Stop'
 
 $Root = Split-Path -Parent $PSScriptRoot
@@ -56,7 +56,11 @@ if (-not $Iscc) {
 
 if ($Iscc) {
     New-Item -ItemType Directory -Force -Path release | Out-Null
-    & $Iscc 'scripts\tiantian.iss'
+    # 版本号只认 backend/app/config.py 这一个来源，避免 iss 里再写死一份导致对不上。
+    $VersionMatch = Select-String -Path 'backend\app\config.py' -Pattern 'APP_VERSION\s*=\s*"([^"]+)"'
+    if (-not $VersionMatch) { throw '没能从 backend/app/config.py 读出 APP_VERSION' }
+    $Version = $VersionMatch.Matches[0].Groups[1].Value
+    & $Iscc "/DMyAppVersion=$Version" 'scripts\tiantian.iss'
 } else {
     Write-Warning '未找到 Inno Setup，跳过安装包。目录版已生成：dist\TianTianJiZhang\'
 }

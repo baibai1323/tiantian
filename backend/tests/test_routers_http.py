@@ -141,3 +141,53 @@ def test_search_escapes_like_wildcards(client, seeded):
 
     assert percent.json()["total"] == 1
     assert underscore.json()["total"] == 0
+
+
+def test_search_matches_secondary_category_name(client, seeded):
+    # 前端占位符承诺「搜备注、二级分类」，只匹配备注会让人以为坏了。
+    add_expense(seeded, 100, "2026-01-05", note="和同事吃饭")
+    other = category_id(seeded, "其他")
+    uncategorized = category_id(seeded, "未分类")
+    seeded.add(
+        Expense(
+            amount_cents=200,
+            category_l1=other,
+            category_l2=uncategorized,
+            spent_on="2026-01-06",
+            note="打车",
+            created_at="2026-01-06T10:00:00+08:00",
+        )
+    )
+    seeded.commit()
+
+    resp = client.get("/api/expenses", params={"month": "2026-01", "q": "午餐"})
+
+    assert resp.status_code == 200
+    assert resp.json()["total"] == 1
+
+
+def test_export_csv_guards_formula_injection(client, seeded):
+    # 备注以 = 开头时，Excel 会当公式执行；导出必须加文本标记。
+    add_expense(seeded, 100, "2026-01-05", note="=HYPERLINK(\"http://evil\")")
+
+    resp = client.get("/api/export/csv", params={"month": "2026-01"})
+
+    assert resp.status_code == 200
+    text = resp.content.decode("utf-8-sig")
+    assert "'=HYPERLINK" in text
+
+
+def test_import_csv_undoes_formula_guard(client, seeded):
+    # 再导回来时要去掉导出加的单引号，否则备注会被悄悄改写。
+    csv_text = (
+        "日期,一级分类,二级分类,金额(元),备注\n"
+        "2026-01-07,餐饮,午餐,3.00,'=1+1\n"
+    )
+
+    resp = client.post("/api/import/csv", json={"content": csv_text})
+
+    assert resp.status_code == 200
+    assert resp.json()["imported"] == 1
+    row = seeded.exec(select(Expense)).first()
+    assert row is not None
+    assert row.note == "=1+1"

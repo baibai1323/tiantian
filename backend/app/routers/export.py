@@ -16,6 +16,24 @@ from ..utils import cents_to_yuan, is_valid_month, normalize_month
 
 router = APIRouter(prefix="/api/export", tags=["export"])
 
+# CSV 公式注入：以这些字符开头的单元格，Excel / WPS 打开时会当成公式执行，
+# 而不是当普通文本显示。备注和自定义分类名都是用户可控的，必须防住。
+_RISKY_PREFIXES = ("=", "+", "-", "@", "\t", "\r")
+
+
+def _safe_cell(value: str) -> str:
+    """给可能被当成公式的文本加一个前导单引号，Excel 会把它当纯文本。
+
+    Excel 的规则是：单元格以 = + - @ 开头时按公式解析；在前面加一个单引号，
+    Excel 会把它当「文本标记」隐藏起来，只显示后面的内容，不会执行。
+    """
+    if value and value.startswith(_RISKY_PREFIXES):
+        return "'" + value
+    return value
+
+
+@router.get("/csv")
+
 # CSV（逗号分隔值）是一种纯文本表格格式，Excel、WPS、Numbers 都能直接打开。
 # 本文件导出的表头格式和 importer.py 读取的表头是对应的，导出的文件可以再导回来。
 # 「流式响应」指不把整个文件先拼成一个字符串再返回，而是边生成边发；这里数据量小，
@@ -74,11 +92,11 @@ def export_csv(
         writer.writerow(
             [
                 row.spent_on,
-                l1.name if l1 else "",
-                l2.name if l2 else "",
+                _safe_cell(l1.name if l1 else ""),
+                _safe_cell(l2.name if l2 else ""),
                 # 金额导出成 "28.00" 这种两位小数的字符串，Excel 会识别成数字。
                 cents_to_yuan(row.amount_cents),
-                row.note,
+                _safe_cell(row.note),
             ]
         )
 
